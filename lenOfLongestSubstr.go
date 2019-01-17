@@ -40,7 +40,7 @@ func lengthOfLongestSubstring(s string) int {
 
 		lastI, ok := last[ch]
 		if ok && lastI >= uniqStart {
-			uniqStart = i
+			uniqStart = lastI + 1
 		}
 		tmpLen := i + 1 - uniqStart
 		if tmpLen > maxLength {
@@ -57,4 +57,5 @@ func main() {
 	assert.Equal(t, lengthOfLongestSubstring("abcabcbb"), 3)
 	assert.Equal(t, lengthOfLongestSubstring("bbbbb"), 1)
 	assert.Equal(t, lengthOfLongestSubstring("pwwkew"), 3)
+	assert.Equal(t, lengthOfLongestSubstring("dvdf"), 3)
 }
