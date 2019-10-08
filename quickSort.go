@@ -18,6 +18,7 @@ func quickSort(arr []int, left, right int) {
 				if arr[j] < key {
 					arr[i] = arr[j]
 					arr[j] = key
+					// i++
 					break
 				}
 				j--
@@ -26,6 +27,7 @@ func quickSort(arr []int, left, right int) {
 				if arr[i] > key {
 					arr[j] = arr[i]
 					arr[i] = key
+					// j--
 					break
 				}
 				i++
