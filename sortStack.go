@@ -30,7 +30,7 @@ func main() {
 	}
 
 	for {
-		if sortStack.Size() == 0 {
+		if sortStack.Empty() {
 			break
 		}
 		fmt.Println(sortStack.Pop())
