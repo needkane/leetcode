@@ -5,15 +5,15 @@ import (
 	"math/rand"
 )
 
-const SKIPLIST_MAXLEVEL = 32 //8
-const SKIPLIST_P = 4
+const MaxLevel = 20
+const MaxCountOfSub = 32
 
 type Node struct {
 	Forward []Node
-	Value   interface{}
+	Value   int
 }
 
-func NewNode(v interface{}, level int) *Node {
+func NewNode(v, level int) *Node {
 	return &Node{Value: v, Forward: make([]Node, level)}
 }
 
@@ -34,7 +34,7 @@ func main() {
 	slt.PrintSkipList()
 }
 func NewSkipList() *SkipList {
-	return &SkipList{Level: 1, Header: NewNode(0, SKIPLIST_MAXLEVEL)}
+	return &SkipList{Level: 0, Header: NewNode(0, MaxCountOfSub)}
 }
 
 func (skipList *SkipList) Insert(key int) {
@@ -42,9 +42,9 @@ func (skipList *SkipList) Insert(key int) {
 	update := make(map[int]*Node)
 	node := skipList.Header
 
-	for i := skipList.Level - 1; i >= 0; i-- {
+	for i := skipList.Level; i >= 0; i-- {
 		for {
-			if node.Forward[i].Value != nil && node.Forward[i].Value.(int) < key {
+			if node.Forward[i].Value != 0 && node.Forward[i].Value < key {
 				node = &node.Forward[i]
 			} else {
 				break
@@ -53,7 +53,7 @@ func (skipList *SkipList) Insert(key int) {
 		update[i] = node
 	}
 
-	level := skipList.Random_level()
+	level := skipList.RandomLevel()
 	if level > skipList.Level {
 		for i := skipList.Level; i < level; i++ {
 			update[i] = skipList.Header
@@ -61,7 +61,7 @@ func (skipList *SkipList) Insert(key int) {
 		skipList.Level = level
 	}
 
-	newNode := NewNode(key, level)
+	newNode := NewNode(key, MaxCountOfSub)
 
 	for i := 0; i < level; i++ {
 		newNode.Forward[i] = update[i].Forward[i]
@@ -70,30 +70,20 @@ func (skipList *SkipList) Insert(key int) {
 
 }
 
-func (skipList *SkipList) Random_level() int {
-
-	level := 1
-	for (rand.Int31()&0xFFFF)%SKIPLIST_P == 0 {
-		level += 1
-	}
-	fmt.Println("78===============", level)
-	if level < SKIPLIST_MAXLEVEL {
-		return level
-	} else {
-		return SKIPLIST_MAXLEVEL
-	}
+func (skipList *SkipList) RandomLevel() int {
+	return rand.Intn(MaxLevel + 1)
 }
 
 func (skipList *SkipList) PrintSkipList() {
 
 	fmt.Println("SkipList-------------------------------------------")
-	for i := SKIPLIST_MAXLEVEL - 1; i >= 0; i-- {
+	for i := MaxLevel - 1; i >= 0; i-- {
 
 		fmt.Println("level:", i)
 		node := skipList.Header.Forward[i]
 		for {
-			if node.Value != nil {
-				fmt.Printf("%d->", node.Value.(int))
+			if node.Value != 0 {
+				fmt.Printf("%d->", node.Value)
 				node = node.Forward[i]
 			} else {
 				break
@@ -110,19 +100,18 @@ func (skipList *SkipList) Search(key int) *Node {
 	node := skipList.Header
 	for i := skipList.Level - 1; i >= 0; i-- {
 
-		fmt.Println("Search() Level=", i)
+		fmt.Printf("Search Level=%d ...\n", i)
 		for {
-			if node.Forward[i].Value == nil {
+			if node.Forward[i].Value == 0 {
 				break
 			}
 
-			fmt.Printf("  %d ", node.Forward[i].Value)
-			if node.Forward[i].Value.(int) == key {
-				fmt.Println("\nFound level=", i, " key=", key)
+			if node.Forward[i].Value == key {
+				fmt.Printf("\nkey=%d found in level=%d \n", key, i)
 				return &node.Forward[i]
 			}
 
-			if node.Forward[i].Value.(int) < key {
+			if node.Forward[i].Value < key {
 				node = &node.Forward[i]
 				continue
 			} else { // > key
@@ -142,17 +131,16 @@ func (skipList *SkipList) Remove(key int) {
 
 		for {
 
-			if node.Forward[i].Value == nil {
+			if node.Forward[i].Value == 0 {
 				break
 			}
 
-			if node.Forward[i].Value.(int) == key {
-				//fmt.Println("Remove() level=", i, " key=", key)
+			if node.Forward[i].Value == key {
 				update[i] = node
 				break
 			}
 
-			if node.Forward[i].Value.(int) < key {
+			if node.Forward[i].Value < key {
 				node = &node.Forward[i]
 				continue
 			} else { // > key
