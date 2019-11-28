@@ -33,8 +33,13 @@ grid[i][j] 为 0 或 1
 */
 package main
 
-func main() {
+import "fmt"
 
+func main() {
+	grid := [][]int{{0, 1}, {1, 0}}
+	fmt.Println(shortestPathBinaryMatrix(grid))
+	grid = [][]int{{0, 0, 0}, {1, 1, 0}, {1, 1, 0}}
+	fmt.Println(shortestPathBinaryMatrix(grid))
 }
 func shortestPathBinaryMatrix(grid [][]int) int {
 	if grid == nil || len(grid[0]) == 0 || grid[0][0] == 1 {
@@ -47,22 +52,23 @@ func shortestPathBinaryMatrix(grid [][]int) int {
 	}
 
 	var shortestPaths = make([][]int, row) //(0,0) to (i,j)
-	var rQ, cQ []int                       //queue for store j and j
+	var rQ = new([]int)                    //queue for store j and j
+	var cQ = new([]int)
 	var r, c int
 	for i := 0; i < row; i++ {
 		shortestPaths[i] = make([]int, col)
 	}
 	shortestPaths[0][0] = 1
-	rQ = append(rQ, 0)
-	cQ = append(cQ, 0)
+	*rQ = append(*rQ, 0)
+	*cQ = append(*cQ, 0)
 	for {
-		if len(rQ) == 0 {
+		if len(*rQ) == 0 {
 			break
 		}
-		r = rQ[0]
-		c = cQ[0]
-		rQ = rQ[1:]
-		cQ = cQ[1:]
+		r = (*rQ)[0]
+		c = (*cQ)[0]
+		*rQ = (*rQ)[1:]
+		*cQ = (*cQ)[1:]
 		if r == row-1 && c == col-1 {
 			return shortestPaths[r][c]
 		}
@@ -74,15 +80,14 @@ func shortestPathBinaryMatrix(grid [][]int) int {
 		walkTo(shortestPaths[r][c], r+1, c-1, grid, shortestPaths, rQ, cQ) //left down
 		walkTo(shortestPaths[r][c], r+1, c, grid, shortestPaths, rQ, cQ)   //down
 		walkTo(shortestPaths[r][c], r+1, c+1, grid, shortestPaths, rQ, cQ) //right down
-
 	}
 	return -1
 }
-func walkTo(pre, toR, toC int, grid, shortestPaths [][]int, rQ, cQ []int) {
+func walkTo(pre, toR, toC int, grid, shortestPaths [][]int, rQ, cQ *[]int) {
 	if toR < 0 || toR == len(grid) || toC < 0 || toC == len(grid[0]) || grid[toR][toC] != 0 || shortestPaths[toR][toC] != 0 {
 		return
 	}
 	shortestPaths[toR][toC] = pre + 1
-	rQ = append(rQ, toR)
-	cQ = append(cQ, toC)
+	*rQ = append(*rQ, toR)
+	*cQ = append(*cQ, toC)
 }
