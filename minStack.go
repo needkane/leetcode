@@ -27,29 +27,102 @@ import (
 	"gopkg.in/karalabe/cookiejar.v2/collections/stack"
 )
 
-type MinStack struct {
+const blockSize = 4096
+
+// Last in, first out data structure.
+type Stack struct {
+	size     int
+	capacity int
+	offset   int
+
+	blocks [][]interface{}
+	active []interface{}
 }
 
-var min_val = math.MaxInt32
+// Creates a new, empty stack.
+func New() *Stack {
+	result := new(Stack)
+	result.active = make([]interface{}, blockSize)
+	result.blocks = [][]interface{}{result.active}
+	result.capacity = blockSize
+	return result
+}
+
+// Pushes a value onto the stack, expanding it if necessary.
+func (s *Stack) Push(data interface{}) {
+	if s.size == s.capacity {
+		s.active = make([]interface{}, blockSize)
+		s.blocks = append(s.blocks, s.active)
+		s.capacity += blockSize
+		s.offset = 0
+	} else if s.offset == blockSize {
+		s.active = s.blocks[s.size/blockSize]
+		s.offset = 0
+	}
+	s.active[s.offset] = data
+	s.offset++
+	s.size++
+}
+
+// Pops a value off the stack and returns it. Currently no shrinking is done.
+func (s *Stack) Pop() (res interface{}) {
+	s.size--
+	s.offset--
+	if s.offset < 0 {
+		s.offset = blockSize - 1
+		s.active = s.blocks[s.size/blockSize]
+	}
+	res, s.active[s.offset] = s.active[s.offset], nil
+	return
+}
+
+// Returns the value currently on the top of the stack. No bounds are checked.
+func (s *Stack) Top() interface{} {
+	if s.offset > 0 {
+		return s.active[s.offset-1]
+	} else {
+		return s.blocks[(s.size-1)/blockSize][blockSize-1]
+	}
+}
+
+// Checks whether the stack is empty or not.
+func (s *Stack) Empty() bool {
+	return s.size == 0
+}
+
+// Returns the number of elements in the stack.
+func (s *Stack) Size() int {
+	return s.size
+}
+
+// Resets the stack, effectively clearing its contents.
+func (s *Stack) Reset() {
+	*s = *New()
+}
+
+type MinStack struct {
+	min_val int
+}
+
 var st = stack.New()
 
 /** initialize your data structure here. */
 func Constructor() MinStack {
-	return MinStack{}
+	return MinStack{math.MaxInt32}
 }
 
 func (this *MinStack) Push(x int) {
-	if x <= min_val {
-		st.Push(min_val)
-		min_val = x
+	if x <= this.min_val {
+		st.Push(this.min_val)
+		this.min_val = x
 	}
 	st.Push(x)
 }
 
 func (this *MinStack) Pop() {
 	i := st.Pop()
-	if i.(int) == min_val {
-		min_val = st.Pop().(int)
+	if i.(int) == this.min_val {
+		this.min_val = st.Pop().(int)
 	}
 }
 
@@ -58,7 +131,7 @@ func (this *MinStack) Top() int {
 }
 
 func (this *MinStack) GetMin() int {
-	return min_val
+	return this.min_val
 }
 
 func main() {
@@ -71,6 +144,11 @@ func main() {
 	mst.Pop()
 	fmt.Println(mst.Top())
 	fmt.Println(mst.GetMin())
+
+	mst2 := Constructor()
+	mst2.Push(-1)
+	fmt.Println(mst2.Top())
+	fmt.Println(mst2.GetMin())
 
 }
 
