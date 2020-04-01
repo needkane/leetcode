@@ -54,7 +54,6 @@ func mergeSortListByGreedy(lists []*list.List) *list.List {
 	}
 	result := list.New()
 	for {
-		fmt.Println(len(lists), result.Len(), lists[0].Len())
 		if len(lists) == 1 {
 			break
 		}
